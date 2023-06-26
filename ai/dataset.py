@@ -1,19 +1,22 @@
 import os
 
+from torch.utils.data import Dataset
+from torchvision.io import read_image
+
 class ImageDataset(Dataset):
 
-    def __init__(self, annotations, img_dir, transform=None, target_transform=None):
+    def __init__(self, img_dir, transform=None, target_transform=None):
         self.items = [len(os.listdir(img_dir+"original")), len(os.listdir(img_dir+"modified"))]
         self.working_dir = img_dir
         self.transform = transform
-        self.target_transform = target_trasform
+        self.target_transform = target_transform
 
 
     def __len__(self):
         return self.items[0]+self.items[1]
 
     def __getitem__(self, idx):
-        if idx > self.items[0]:
+        if idx < self.items[0]:
             image = read_image(self.working_dir+"original/ori_"+str(idx+1)+".jpg")
             label = 0
         elif idx < self.items[0]+self.items[1]:
