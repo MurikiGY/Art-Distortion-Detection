@@ -15,10 +15,21 @@ class Neural_Network(Module):
         self.relu2 = ReLU()
         self.maxpool2 = MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 
-        self.fc1 = Linear(in_features=800, out_features=500)
+        ch3 = 50
+        self.conv3 = Conv2d(in_channels=ch2, out_channels=ch3, kernel_size=(5, 5))
         self.relu3 = ReLU()
+        self.maxpool3 = MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 
-        self.fc2 = Linear(in_features=500, out_features=classes)
+        ch4 = 50
+        self.conv4 = Conv2d(in_channels=ch3, out_channels=ch4, kernel_size=(5, 5))
+        self.relu4 = ReLU()
+        self.maxpool4 = MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+
+        fc_ch1 = 1000
+        self.fc1 = Linear(in_features=7200, out_features=fc_ch1)
+        self.relu5 = ReLU()
+
+        self.fc2 = Linear(in_features=fc_ch1, out_features=classes)
         self.logSoftmax = LogSoftmax(dim=1)
 
     def forward(self, x):
@@ -30,9 +41,17 @@ class Neural_Network(Module):
         x = self.relu2(x)
         x = self.maxpool2(x)
 
+        x = self.conv3(x)
+        x = self.relu3(x)
+        x = self.maxpool3(x)
+
+        x = self.conv4(x)
+        x = self.relu4(x)
+        x = self.maxpool4(x)
+
         x = flatten(x, 1)
         x = self.fc1(x)
-        x = self.relu3(x)
+        x = self.relu5(x)
 
         x = self.fc2(x)
         out = self.logSoftmax(x)

@@ -18,13 +18,20 @@ device = (
 )
 print(f"Using {device} device")
 
+resizer = torchvision.transforms.Resize((256, 256))
+grayscaler = torchvision.transforms.Grayscale()
+
+def treat_img(img):
+    img = resizer(img)
+    img = grayscaler(img)
+    img = torchvision.transforms.functional.convert_image_dtype(img, torch.float32)
+    return img
 
 #ajeitando dados
-to_tensor = torchvision.transforms.ToTensor()
 
 data = dataset.ImageDataset(
         "data/",
-        transform = lambda y: to_tensor(y),
+        transform = treat_img,
         target_transform = lambda y: torch.zeros(
             2, dtype=torch.float).scatter_(dim=0, index=torch.tensor(y), value=1)
     )
@@ -37,7 +44,8 @@ BATCH_SIZE = 64
 train_dataloader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=True)
 
-print(data[0])
+
+#print(data[0])
 
 
 #Parte do aprendizado de máquina
@@ -45,7 +53,7 @@ print(data[0])
 trainSteps = len(train_dataloader.dataset) // BATCH_SIZE
 valSteps = len(test_dataloader.dataset) // BATCH_SIZE
 
-model = cnn.Neural_Network(3, 2).to(device)
+model = cnn.Neural_Network(1, 2).to(device)
 
 history = {
         "train_loss": [],
@@ -57,7 +65,7 @@ INIT_LR = 0.001
 EPOCHS = 10
 
 opt = Adam(model.parameters(), lr=INIT_LR)
-lossFn = torch.nn.NLLLoss
+lossFn = torch.nn.CrossEntropyLoss()
 
 print("Training...")
 
@@ -82,7 +90,11 @@ for e in range(EPOCHS):
         opt.step()
 
         tTrainLoss += loss
-        trainCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+        #trainCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+
+        for i in range(len(y)):
+            if torch.argmax(pred[i]) == torch.argmax(y[i]):
+                trainCorrect += 1
 
     with torch.no_grad():
         model.eval()
@@ -93,8 +105,11 @@ for e in range(EPOCHS):
             pred = model(x)
             tValLoss += lossFn(pred, y)
 
-            valCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+            #valCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
 
+            for i in range(len(y)):
+                if torch.argmax(pred[i]) == torch.argmax(y[i]):
+                    valCorrect += 1
 
 
     history["train_acc"].append(trainCorrect / len(train_dataloader.dataset))
@@ -107,8 +122,12 @@ for e in range(EPOCHS):
     print(" Train loss: {:.5f}, Train accuracy: {:.4f}".format(history["train_loss"][-1], history["train_acc"][-1]))
     print(" Test loss: {:.5f}, Test accuracy: {:.4f}".format(history["test_loss"][-1], history["test_acc"][-1]))
 
+    print("Saving...")
+    torch.save(model, "model.pth")
+
+
 print(history)
-torch.save(model, "model.pth")
+
 
 
 #plot
