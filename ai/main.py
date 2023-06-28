@@ -3,9 +3,13 @@ import dataset
 import cnn
 import torchvision
 import matplotlib.pyplot as plt
+import time
 
 from torch.optim import Adam
 from torch.utils.data import DataLoader
+
+
+start_time = time.time()
 
 #selecionando dispositivo de hardware
 
@@ -18,7 +22,8 @@ device = (
 )
 print(f"Using {device} device")
 
-resizer = torchvision.transforms.Resize((256, 256))
+img_size = 512
+resizer = torchvision.transforms.Resize((img_size, img_size))
 grayscaler = torchvision.transforms.Grayscale()
 
 def treat_img(img):
@@ -71,6 +76,8 @@ print("Training...")
 
 for e in range(EPOCHS):
     print("Epoch number ", e, " of training")
+    aux_time = time.time()
+
     model.train()
 
     tTrainLoss = 0
@@ -122,6 +129,8 @@ for e in range(EPOCHS):
     print(" Train loss: {:.5f}, Train accuracy: {:.4f}".format(history["train_loss"][-1], history["train_acc"][-1]))
     print(" Test loss: {:.5f}, Test accuracy: {:.4f}".format(history["test_loss"][-1], history["test_acc"][-1]))
 
+    print(" Took {:.5f} seconds".format(time.time()-aux_time))
+
     print("Saving...")
     torch.save(model, "model.pth")
 
@@ -140,4 +149,4 @@ plt.ylabel("Loss/Accuracy")
 plt.legend(loc="lower left")
 plt.savefig("graph.png")
 
-
+print("Finished training in {:.5f} seconds".format(time.time()-aux_time))
