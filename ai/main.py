@@ -22,7 +22,7 @@ device = (
 )
 print(f"Using {device} device")
 
-img_size = 512
+img_size = 256
 resizer = torchvision.transforms.Resize((img_size, img_size))
 grayscaler = torchvision.transforms.Grayscale()
 
@@ -97,7 +97,6 @@ for e in range(EPOCHS):
         opt.step()
 
         tTrainLoss += loss
-        #trainCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
 
         for i in range(len(y)):
             if torch.argmax(pred[i]) == torch.argmax(y[i]):
@@ -112,7 +111,6 @@ for e in range(EPOCHS):
             pred = model(x)
             tValLoss += lossFn(pred, y)
 
-            #valCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
 
             for i in range(len(y)):
                 if torch.argmax(pred[i]) == torch.argmax(y[i]):
@@ -126,27 +124,33 @@ for e in range(EPOCHS):
     history["test_loss"].append(tValLoss / valSteps)
 
     print("Finished epoch ", e)
-    print(" Train loss: {:.5f}, Train accuracy: {:.4f}".format(history["train_loss"][-1], history["train_acc"][-1]))
-    print(" Test loss: {:.5f}, Test accuracy: {:.4f}".format(history["test_loss"][-1], history["test_acc"][-1]))
+    print(" Train loss: {:.8f}, Train accuracy: {:.8f}".format(history["train_loss"][-1], history["train_acc"][-1]))
+    print(" Test loss: {:.8f}, Test accuracy: {:.8f}".format(history["test_loss"][-1], history["test_acc"][-1]))
 
     print(" Took {:.5f} seconds".format(time.time()-aux_time))
 
     print("Saving...")
     torch.save(model, "model.pth")
 
+    #plot
 
-#plot
+    with torch.no_grad():
+        plt.style.use("ggplot")
+        plt.figure()
+        plt.plot(history["train_loss"], label="train_loss")
+        plt.plot(history["test_loss"], label="test_loss")
+        plt.plot(history["train_acc"], label="train_acc")
+        plt.plot(history["test_acc"], label="test_acc")
+        plt.title("Training Loss and Accuracy on Dataset")
+        plt.xlabel("Epoch #")
+        plt.ylabel("Loss/Accuracy")
+        plt.legend(loc="lower left")
+        plt.savefig("graph.png")
 
-plt.style.use("ggplot")
-plt.figure()
-plt.plot(history["train_loss"], label="train_loss")
-plt.plot(history["test_loss"], label="test_loss")
-plt.plot(history["train_acc"], label="train_acc")
-plt.plot(history["test_acc"], label="test_acc")
-plt.title("Training Loss and Accuracy on Dataset")
-plt.xlabel("Epoch #")
-plt.ylabel("Loss/Accuracy")
-plt.legend(loc="lower left")
-plt.savefig("graph.png")
-
+print(history)
 print("Finished training in {:.5f} seconds".format(time.time()-aux_time))
+
+
+
+
+

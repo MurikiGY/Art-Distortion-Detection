@@ -5,7 +5,7 @@ class Neural_Network(Module):
     def __init__(self, numChannels, classes):
         super(Neural_Network, self).__init__()
 
-        conv_layer = [20, 30, 40, 50, 60, 70]
+        conv_layer = [20, 50, 50, 50]
 
         self.conv = []
         self.conv_relu = []
@@ -22,8 +22,8 @@ class Neural_Network(Module):
             self.maxpool.append(MaxPool2d(kernel_size=(2, 2), stride=(2, 2)))
 
 
-        in_feat = 1120
-        fc_layer = [500, 250]
+        in_feat = 7200
+        fc_layer = [360, 20]
 
         self.fc = []
         self.fc_relu = []
