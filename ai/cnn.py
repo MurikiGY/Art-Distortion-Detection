@@ -1,4 +1,4 @@
-from torch.nn import Module, Conv2d, Linear, MaxPool2d, ReLU, LogSoftmax
+from torch.nn import Module, Conv2d, Linear, MaxPool2d, ReLU, LogSoftmax, ModuleList
 from torch import flatten
 
 class Neural_Network(Module):
@@ -7,9 +7,9 @@ class Neural_Network(Module):
 
         conv_layer = [20, 50, 50, 50]
 
-        self.conv = []
-        self.conv_relu = []
-        self.maxpool = []
+        self.conv = ModuleList()
+        self.conv_relu = ModuleList()
+        self.maxpool = ModuleList()
 
         for i in range(len(conv_layer)):
             if i == 0:
@@ -25,8 +25,8 @@ class Neural_Network(Module):
         in_feat = 7200
         fc_layer = [360, 20]
 
-        self.fc = []
-        self.fc_relu = []
+        self.fc = ModuleList()
+        self.fc_relu = ModuleList()
 
         for i in range(len(fc_layer)):
             if i == 0:
@@ -42,18 +42,23 @@ class Neural_Network(Module):
 
     def forward(self, x):
 
+        print(x.size())
         for i in range(len(self.conv)):
             x = self.conv[i](x)
             x = self.conv_relu[i](x)
             x = self.maxpool[i](x)
+            print(x.size())
 
         x = flatten(x, 1)
+        print(x.size())
 
         for i in range(len(self.fc)):
             x = self.fc[i](x)
             x = self.fc_relu[i](x)
+            print(x.size())
 
         x = self.final_layer(x)
+        print(x.size())
         out = self.logSoftmax(x)
 
         return out
