@@ -5,7 +5,7 @@ class Neural_Network(Module):
     def __init__(self, numChannels, classes):
         super(Neural_Network, self).__init__()
 
-        conv_layer = [20, 50, 50, 50]
+        conv_layer = [20, 40, 60, 80]
 
         self.conv = ModuleList()
         self.conv_relu = ModuleList()
@@ -22,8 +22,8 @@ class Neural_Network(Module):
             self.maxpool.append(MaxPool2d(kernel_size=(2, 2), stride=(2, 2)))
 
 
-        in_feat = 7200
-        fc_layer = [360, 20]
+        in_feat = 11520
+        fc_layer = [2000, 1000, 500]
 
         self.fc = ModuleList()
         self.fc_relu = ModuleList()
@@ -42,23 +42,18 @@ class Neural_Network(Module):
 
     def forward(self, x):
 
-        print(x.size())
         for i in range(len(self.conv)):
             x = self.conv[i](x)
             x = self.conv_relu[i](x)
             x = self.maxpool[i](x)
-            print(x.size())
 
         x = flatten(x, 1)
-        print(x.size())
 
         for i in range(len(self.fc)):
             x = self.fc[i](x)
             x = self.fc_relu[i](x)
-            print(x.size())
 
         x = self.final_layer(x)
-        print(x.size())
         out = self.logSoftmax(x)
 
         return out
